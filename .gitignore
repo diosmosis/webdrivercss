@@ -27,3 +27,6 @@ test/site/components
 
 #jetbrains IDE
 .idea
+
+.DS_Store
+
