@@ -1,4 +1,6 @@
 describe('WebdriverCSS compares images and exposes information about CSS regression', function() {
+    before(beforeHook);
+    after(afterHook);
 
     var capturingData = {
         elem: '.yellow',
@@ -7,31 +9,21 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
         height: 102
     };
 
-    before(function(done) {
+    before(async function () {
+        WebdriverCSS.init(this.browser, { saveImages: true })
 
-        this.browser = WebdriverIO.remote(capabilities);
-
-        // init plugin
-        WebdriverCSS.init(this.browser);
-
-        this.browser
+        await this.browser
             .init()
             .url(testurl)
             .windowHandleSize({ width: 800, height: 600 })
-            .call(done);
-
-    });
+    })
 
     describe('should take a screenshot of same area without any changes in it', function(done) {
         var resultObject;
 
-        before(function(done) {
-            this.browser
-                .webdrivercss('comparisonTest', capturingData, function(err, res) {
-                    should.not.exist(err);
-                    resultObject = res[capturingData.name][0];
-                })
-                .call(done);
+        before(async function() {
+            const res = await this.browser.webdrivercss('comparisonTest', capturingData);
+            resultObject = res[capturingData.name][0];
         });
 
         it('should exist an image (*.baseline.png) in the default image folder', function(done) {
@@ -67,17 +59,15 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
     describe('should change something within given area to do an image diff', function() {
         var resultObject = {};
 
-        before(function(done) {
-            this.browser
+        before(async function() {
+            const res = await this.browser
                 .execute(function() {
                     document.querySelector('.green').style.backgroundColor = 'white';
                     document.querySelector('.black').style.backgroundColor = 'white';
                 },[])
-                .webdrivercss('comparisonTest', capturingData, function(err,res) {
-                    should.not.exist(err);
-                    resultObject = res[capturingData.name][0];
-                })
-                .call(done);
+                .webdrivercss('comparisonTest', capturingData);
+
+            resultObject = res[capturingData.name][0];
         });
 
         it('should exist an image (*.baseline.png) in the default image folder', function(done) {
@@ -118,13 +108,9 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
     describe('should take a screenshot of same area without any changes in it', function() {
         var resultObject = {};
 
-        before(function(done) {
-            this.browser
-                .webdrivercss('comparisonTest', capturingData, function(err,res) {
-                    should.not.exist(err);
-                    resultObject = res[capturingData.name][0];
-                })
-                .call(done);
+        before(async function() {
+            const res = await this.browser.webdrivercss('comparisonTest', capturingData);
+            resultObject = res[capturingData.name][0];
         });
 
         it('should exist an image (*.baseline.png) in the default image folder', function(done) {
@@ -165,15 +151,11 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
     describe('updates baseline if updateBaseImages is given', function(done) {
         var resultObject = {};
 
-        before(function(done) {
+        before(async function() {
             capturingData.updateBaseline = true;
 
-            this.browser
-                .webdrivercss('comparisonTest', capturingData, function(err,res) {
-                    should.not.exist(err);
-                    resultObject = res[capturingData.name][0];
-                })
-                .call(done);
+            const res = await this.browser.webdrivercss('comparisonTest', capturingData);
+            resultObject = res[capturingData.name][0];
         });
 
         it('should exist an image (*.baseline.png) in the default image folder', function(done) {
@@ -209,14 +191,12 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
     describe('should match an image when match percentage is equal to tolerance', function() {
         var resultObject = {};
 
-        before(function(done) {
-            this.browser
+        before(async function() {
+            const res = await this.browser
                 .url(testurlFour)
                 .webdrivercss('comparisonTest', {
                     elem: '#container',
                     name: 'test-equal'
-                }, function(err,res) {
-                    should.not.exist(err);
                 })
                 .execute(function() {
                     document.querySelector('#difference').style.backgroundColor = 'white';
@@ -224,11 +204,8 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
                 .webdrivercss('comparisonTest', {
                     elem: '#container',
                     name: 'test-equal'
-                }, function(err,res) {
-                    should.not.exist(err);
-                    resultObject = res['test-equal'][0];
-                })
-                .call(done);
+                });
+            resultObject = res['test-equal'][0];
         });
 
         it('should be within tolerance', function() {

@@ -30,3 +30,5 @@ test/site/components
 
 .DS_Store
 
+# test directories
+/webdrivercss/

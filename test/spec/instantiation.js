@@ -1,10 +1,16 @@
 /*jshint -W030 */
 
 describe('WebdriverCSS plugin as WebdriverIO enhancement', function() {
+    before(beforeHook);
+    after(afterHook);
 
-    before(function() {
-        return this.browser = WebdriverIO.remote(capabilities).init();
-    });
+    let tempBrowser
+    afterEach(function () {
+        if (tempBrowser) {
+            tempBrowser.end()
+            tempBrowser = null
+        }
+    })
 
     it('should not exist as command in WebdriverIO instance without initialization', function() {
         should.not.exist(this.browser.webdrivercss);
@@ -30,16 +36,17 @@ describe('WebdriverCSS plugin as WebdriverIO enhancement', function() {
     });
 
     it('should contain some default values', function() {
-        var plugin = WebdriverCSS.init(this.browser);
+        tempBrowser = WebdriverIO.remote(capabilities);
+        var plugin = WebdriverCSS.init(tempBrowser);
 
         expect(plugin.options).to.have.property('screenshotRoot').to.equal('webdrivercss');
         expect(plugin.options).to.have.property('failedComparisonsRoot').to.equal('webdrivercss/diff');
         expect(plugin.options).to.have.property('misMatchTolerance').to.equal(0.05);
-
     });
 
     it('should contain some custom values', function() {
-        var plugin = WebdriverCSS.init(this.browser, {
+      tempBrowser = WebdriverIO.remote(capabilities);
+        var plugin = WebdriverCSS.init(tempBrowser, {
             screenshotRoot: '__screenshotRoot__',
             failedComparisonsRoot: '__failedComparisonsRoot__',
             misMatchTolerance: 50

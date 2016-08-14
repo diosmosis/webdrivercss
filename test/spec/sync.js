@@ -6,36 +6,60 @@ var fs = require('fs'),
 
 nock.enableNetConnect();
 
-describe.skip('WebdriverCSS should be able to', function() {
+describe('WebdriverCSS should be able to', function() {
+    before(beforeHook);
+    after(afterHook);
 
-    describe('sync the image repository with an external API', function() {
+    describe('sync', function () {
+        let browser
+        before(function () {
+          browser = WebdriverIO.remote(capabilities);
+        })
 
-        before(function(done) {
-            this.browser = WebdriverIO.remote(capabilities);
+        after(function () {
+          browser.end();
+        })
 
-            // init plugin
-            var plugin = WebdriverCSS.init(this.browser, {
-                api:  'http://127.0.0.1:8081/webdrivercss/api',
-                user: 'johndoe',
-                key:  'xyz'
-            });
-
-            this.browser
-                .init()
-                .url(testurl)
-                .call(done);
-        });
-
-        it('throws an error if API isn\'t provided', function(done) {
-            var browser = WebdriverIO.remote(capabilities);
+        it('throws an error if API isn\'t provided', async function() {
             WebdriverCSS.init(browser);
 
-            browser.init().sync(function(err) {
-                expect(err).not.to.be.null;
-            }).end(done);
+            let error
+            try {
+                await browser.init().sync();
+            } catch (e) {
+                error = e;
+            }
+
+            expect(error).to.be.instanceof(Error);
+        });
+    })
+
+    describe('sync the image repository with an external API', function() {
+        let browser
+        before(function () {
+          browser = WebdriverIO.remote(capabilities);
+        })
+
+        after(function () {
+          browser.end();
+        })
+
+        before(async function() {
+            // init plugin
+            var plugin = WebdriverCSS.init(browser, {
+                api:  'http://127.0.0.1:8081/webdrivercss/api',
+                user: 'johndoe',
+                key:  'xyz',
+                saveImages: true,
+            });
+
+            await browser
+                .init()
+                .windowHandleSize({ width: 800, height: 600 })
+                .url(testurl);
         });
 
-        it('should download and unzip a repository by calling sync() for the first time', function(done) {
+        it('should download and unzip a repository by calling sync() for the first time', async function() {
 
             var scope = nock('http://127.0.0.1:8081')
                 .defaultReplyHeaders({
@@ -46,15 +70,13 @@ describe.skip('WebdriverCSS should be able to', function() {
                     return fs.createReadStream(path.join(__dirname, '..', 'fixtures', 'webdrivercss.tar.gz'));
                 });
 
-            this.browser.sync().call(function() {
-                expect(fs.existsSync(path.join(__dirname, '..', '..', 'webdrivercss'))).to.be.true;
-                expect(fs.existsSync(path.join(__dirname, '..', '..', 'webdrivercss', 'comparisonTest.current.png'))).to.be.true;
-            }).call(done);
+            await browser.sync();
 
+            expect(fs.existsSync(path.join(__dirname, '..', '..', 'webdrivercss'))).to.be.true;
+            expect(fs.existsSync(path.join(__dirname, '..', '..', 'webdrivercss', 'comparisonTest.current.png'))).to.be.true;
         });
 
-        it('should zip and upload repository to API after test run', function(done) {
-
+        it('should zip and upload repository to API after test run', async function() {
             var madeRequest = false;
             var scope = nock('http://127.0.0.1:8081')
                 .defaultReplyHeaders({
@@ -65,19 +87,16 @@ describe.skip('WebdriverCSS should be able to', function() {
                     madeRequest = true;
                 });
 
-            this.browser
+            await browser
                 .webdrivercss('testWithoutParameter', {
                     name: 'test'
                 })
-                .sync()
-                .call(function() {
-                    expect(madeRequest).to.be.true;
+                .sync();
 
-                    // should delete the tarball file after syncing
-                    expect(fs.existsSync(path.join(__dirname, '..', '..', 'webdrivercss.tar.gz'))).to.be.false;
-                })
-                .call(done);
+            expect(madeRequest).to.be.true;
 
+            // should delete the tarball file after syncing
+            expect(fs.existsSync(path.join(__dirname, '..', '..', 'webdrivercss.tar.gz'))).to.be.false;
         });
     });
 
@@ -122,29 +141,38 @@ describe.skip('WebdriverCSS should be able to', function() {
         /**
          * mock session end
          */
-        nock(applitoolsHost, {reqheaders: headers})
-            .delete('/api/sessions/running/' + fakeSessionId + '?apiKey=' + key + '&updateBaseline=' + updateBaseline)
+        nock(applitoolsHost)
+            .delete('/api/sessions/running/' + fakeSessionId + '?apiKey=' + key)
             .reply(200, function(uri, requestBody) {
                 isSessionClosed = true;
                 return {'steps':1,'matches':1,'mismatches':0,'missing':0};
             });
 
-        before(function(done) {
-            this.browser = WebdriverIO.remote(capabilities);
+        let browser
+        before(async function() {
+            browser = WebdriverIO.remote(capabilities);
 
             // init plugin
-            var plugin = WebdriverCSS.init(this.browser, {
-                key:  key,
-                updateBaseline: updateBaseline
+            var plugin = WebdriverCSS.init(browser, {
+                usesApplitools: true,
+                applitools: {
+                    host: applitoolsHost,
+                    apiKey: key,
+                },
+                updateBaseline,
             });
 
-            this.browser
+            await browser
                 .init()
                 .url(testurl)
                 .webdrivercss('applitoolstest', {
                     name: 'page'
-                }, done);
+                });
         });
+
+        after(function () {
+            browser.end();
+        })
 
         it('should throw an error if no app id is provided', function() {
             expect(isSessionInitiated).to.be.true;

@@ -1,4 +1,15 @@
 describe('WebdriverCSS should exclude parts of websites to ignore changing content', function() {
+    before(beforeHook);
+    after(afterHook);
+
+    before(async function () {
+        WebdriverCSS.init(this.browser, { saveImages: true })
+
+        await this.browser
+            .init()
+            .windowHandleSize({ width: 800, height: 600 })
+    })
+
     it('should exclude constantly changing content using CSS selectors', async function() {
         await this.browser
             .url(testurlThree)
@@ -112,19 +123,3 @@ describe('WebdriverCSS should exclude parts of websites to ignore changing conte
         compareResult.equality.should.be.within(0, 0.0001);
     });
 });
-
-function compare(...files) {
-  return new Promise((resolve, reject) => {
-    gm.compare(...files, (err, isEqual, equality, raw) => {
-      if (err) {
-        return reject(err)
-      }
-
-      resolve({
-        isEqual,
-        equality,
-        raw,
-      })
-    })
-  })
-}

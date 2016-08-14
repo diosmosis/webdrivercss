@@ -27,24 +27,30 @@ global.failedComparisonsRootCustom = '__failedComparisonsRoot__';
 
 require('./site');
 
-before(async function () {
-    try {
-        fs.mkdirSync(screenshotRootDefault);
-    } catch (e) {
-      // ignore
-    }
+global.compare = function compare(...files) {
+  return new Promise((resolve, reject) => {
+    gm.compare(...files, (err, isEqual, equality, raw) => {
+      if (err) {
+        return reject(err)
+      }
+
+      resolve({
+        isEqual,
+        equality,
+        raw,
+      })
+    })
+  })
+}
+
+global.beforeHook = async function () {
+    fs.removeSync(screenshotRootDefault)
+    fs.removeSync(screenshotRootCustom)
 
     this.browser = WebdriverIO.remote(capabilities)
+};
 
-    // init plugin
-    WebdriverCSS.init(this.browser, { saveImages: true })
-
-    await this.browser
-        .init()
-        .windowHandleSize({ width: 800, height: 600 })
-});
-
-after(function(done) {
+global.afterHook = function(done) {
     var browser = this.browser;
 
     /**
@@ -57,16 +63,14 @@ after(function(done) {
                 .catch(done);
         },
         function(done) { fs.remove(failedComparisonsRootDefault,done); },
-        function(done) { fs.remove(screenshotRootDefault,done); },
         function(done) { fs.remove(failedComparisonsRootCustom,done); },
-        function(done) { fs.remove(screenshotRootCustom,done); },
         function(done) {
           exec('rm -r .tmp*').then(function (res) {
-            setImmediate(done, null, res);
+            setImmediate(done);
           }, function (err) {
-            setImmediate(done, err);
+            setImmediate(done);
           })
         },
     ], done);
 
-});
+};

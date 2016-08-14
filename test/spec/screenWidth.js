@@ -1,13 +1,13 @@
 describe('WebdriverCSS captures shots with different screen widths', function() {
+    before(beforeHook);
+    after(afterHook);
+
     var resultObject;
 
-    before(function(done) {
-        this.browser = WebdriverIO.remote(capabilities);
+    before(async function() {
+        WebdriverCSS.init(this.browser, { saveImages: true })
 
-        // init plugin
-        WebdriverCSS.init(this.browser);
-
-        this.browser
+        resultObject = await this.browser
             .init()
             .url(testurl)
             .windowHandleSize({ width: 999, height: 999 })
@@ -19,12 +19,7 @@ describe('WebdriverCSS captures shots with different screen widths', function() 
                     name: 'test_two',
                     screenWidth: [444,666]
                 }
-            ], function(err, res) {
-                should.not.exist(err);
-                resultObject = res;
-            })
-            .call(done);
-
+            ]);
     });
 
     /**
@@ -69,14 +64,10 @@ describe('WebdriverCSS captures shots with different screen widths', function() 
         });
     });
 
-    it('browser should be get back to old resolution after shots were taken', function(done) {
-        this.browser
-            .windowHandleSize(function(err,res) {
-                should.not.exist(err);
-                res.value.width.should.be.equal(999);
-                res.value.height.should.be.equal(999);
-            })
-            .call(done);
+    it('browser should be get back to old resolution after shots were taken', async function() {
+        const res = await this.browser.windowHandleSize();
+        res.value.width.should.be.equal(999);
+        res.value.height.should.be.equal(999);
     });
 
     describe('returns a result object with proper test results', function() {
