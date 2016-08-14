@@ -6,7 +6,7 @@ var fs = require('fs'),
 
 nock.enableNetConnect();
 
-describe('WebdriverCSS should be able to', function() {
+describe.skip('WebdriverCSS should be able to', function() {
 
     describe('sync the image repository with an external API', function() {
 
@@ -79,8 +79,6 @@ describe('WebdriverCSS should be able to', function() {
                 .call(done);
 
         });
-
-        after(afterHook);
     });
 
 
@@ -159,7 +157,5 @@ describe('WebdriverCSS should be able to', function() {
         it('should end applitools session', function() {
             expect(isSessionClosed).to.be.true;
         });
-
-        after(afterHook);
     });
 });

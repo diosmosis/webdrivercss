@@ -49,7 +49,4 @@ describe('WebdriverCSS should remove parts of websites to ignore changing conten
                 });
             });
     });
-
-    after(afterHook);
-
 });

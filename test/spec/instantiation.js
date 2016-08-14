@@ -63,7 +63,4 @@ describe('WebdriverCSS plugin as WebdriverIO enhancement', function() {
             done();
         });
     });
-
-    after(afterHook);
-
 });

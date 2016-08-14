@@ -3,3 +3,4 @@ test/spec/*.js
 
 --timeout 1000000,
 --reporter spec
+--compilers js:babel-core/register

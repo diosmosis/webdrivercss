@@ -92,7 +92,4 @@ describe('WebdriverCSS captures shots with different screen widths', function() 
         })
 
     });
-
-    after(afterHook);
-
 });

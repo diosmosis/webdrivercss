@@ -1,57 +1,38 @@
 describe('WebdriverCSS should exclude parts of websites to ignore changing content', function() {
-
-    before(function(done) {
-
-        this.browser = WebdriverIO.remote(capabilities);
-
-        // init plugin
-        WebdriverCSS.init(this.browser);
-
-        this.browser
-            .init()
-            .windowHandleSize({ width: 800, height: 600 })
-            .call(done);
-
-    });
-
-    it('should exclude constantly changing content using CSS selectors', function(done) {
-        this.browser
+    it('should exclude constantly changing content using CSS selectors', async function() {
+        await this.browser
             .url(testurlThree)
             .webdrivercss('excludeUsingCssSelectors', {
                 elem: '.third',
                 exclude: '.third',
                 name: '_'
             })
-            .call(function() {
-                gm.compare('webdrivercss/excludeUsingCssSelectors._.baseline.png', 'test/fixtures/excludeElem.png', function (err, isEqual, equality, raw) {
-                    should.not.exist(err);
-                    isEqual.should.be.equal(true);
-                    equality.should.be.within(0, 0.0001);
-                    done();
-                });
-            });
-    });
 
-    it('should exclude constantly changing content using xPath selectors', function(done) {
-        this.browser
+        const compareResult = await compare(
+          'webdrivercss/excludeUsingCssSelectors._.baseline.png', 'test/fixtures/excludeElem.png')
+
+        compareResult.isEqual.should.be.equal(true);
+        compareResult.equality.should.be.within(0, 0.0001);
+    })
+
+    it('should exclude constantly changing content using xPath selectors', async function() {
+        await this.browser
             .url(testurlThree)
             .webdrivercss('excludeUsingXPath', {
                 elem: '//html/body/section',
                 exclude: '//html/body/section',
                 name: '_'
             })
-            .call(function() {
-                gm.compare('webdrivercss/excludeUsingXPath._.baseline.png', 'test/fixtures/excludeElem.png', function (err, isEqual, equality, raw) {
-                    should.not.exist(err);
-                    isEqual.should.be.equal(true);
-                    equality.should.be.within(0, 0.0001);
-                    done();
-                });
-            });
-    });
 
-    it('should exclude constantly changing content using single xy rectangle', function(done) {
-        this.browser
+        const compareResult = await compare(
+            'webdrivercss/excludeUsingXPath._.baseline.png', 'test/fixtures/excludeElem.png')
+
+        compareResult.isEqual.should.be.equal(true);
+        compareResult.equality.should.be.within(0, 0.0001);
+    })
+
+    it('should exclude constantly changing content using single xy rectangle', async function() {
+        await this.browser
             .url(testurlThree)
             .webdrivercss('excludeUsingXYParameters', {
                 elem: '.third',
@@ -63,18 +44,16 @@ describe('WebdriverCSS should exclude parts of websites to ignore changing conte
                 },
                 name: '_'
             })
-            .call(function() {
-                gm.compare('webdrivercss/excludeUsingXYParameters._.baseline.png', 'test/fixtures/excludeElem.png', function (err, isEqual, equality, raw) {
-                    should.not.exist(err);
-                    isEqual.should.be.equal(true);
-                    equality.should.be.within(0, 0.0001);
-                    done();
-                });
-            });
+
+        const compareResult = await compare(
+            'webdrivercss/excludeUsingXYParameters._.baseline.png', 'test/fixtures/excludeElem.png')
+
+        compareResult.isEqual.should.be.equal(true);
+        compareResult.equality.should.be.within(0, 0.0001);
     });
 
-    it('should exclude constantly changing content using multiple xy rectangles', function(done) {
-        this.browser
+    it('should exclude constantly changing content using multiple xy rectangles', async function() {
+        await this.browser
             .url(testurlThree)
             .webdrivercss('excludeMultipleXYParameters', {
                 elem: '.third',
@@ -91,18 +70,16 @@ describe('WebdriverCSS should exclude parts of websites to ignore changing conte
                 }],
                 name: '_'
             })
-            .call(function() {
-                gm.compare('webdrivercss/excludeMultipleXYParameters._.baseline.png', 'test/fixtures/excludeElem.png', function (err, isEqual, equality, raw) {
-                    should.not.exist(err);
-                    isEqual.should.be.equal(true);
-                    equality.should.be.within(0, 0.0001);
-                    done();
-                });
-            });
+
+        const compareResult = await compare(
+            'webdrivercss/excludeMultipleXYParameters._.baseline.png', 'test/fixtures/excludeElem.png')
+
+        compareResult.isEqual.should.be.equal(true);
+        compareResult.equality.should.be.within(0, 0.0001);
     });
 
-    it('should exclude constantly changing content using multiple xy points', function(done) {
-        this.browser
+    it('should exclude constantly changing content using multiple xy points', async function() {
+        await this.browser
             .url(testurlThree)
             .webdrivercss('excludeMultipleXYPoints', {
                 elem: '.third',
@@ -127,16 +104,27 @@ describe('WebdriverCSS should exclude parts of websites to ignore changing conte
                 }],
                 name: '_'
             })
-            .call(function() {
-                gm.compare('webdrivercss/excludeMultipleXYPoints._.baseline.png', 'test/fixtures/excludeElem.png', function (err, isEqual, equality, raw) {
-                    should.not.exist(err);
-                    isEqual.should.be.equal(true);
-                    equality.should.be.within(0, 0.0001);
-                    done();
-                });
-            });
+
+        const compareResult = await compare(
+            'webdrivercss/excludeMultipleXYPoints._.baseline.png', 'test/fixtures/excludeElem.png')
+
+        compareResult.isEqual.should.be.equal(true);
+        compareResult.equality.should.be.within(0, 0.0001);
     });
-
-    after(afterHook);
-
 });
+
+function compare(...files) {
+  return new Promise((resolve, reject) => {
+    gm.compare(...files, (err, isEqual, equality, raw) => {
+      if (err) {
+        return reject(err)
+      }
+
+      resolve({
+        isEqual,
+        equality,
+        raw,
+      })
+    })
+  })
+}

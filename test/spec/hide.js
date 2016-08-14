@@ -49,7 +49,4 @@ describe('WebdriverCSS should hide parts of websites to ignore changing content'
                 });
             });
     });
-
-    after(afterHook);
-
 });

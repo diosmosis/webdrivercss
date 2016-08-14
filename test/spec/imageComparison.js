@@ -239,7 +239,4 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
         });
 
     });
-
-    after(afterHook);
-
 });

@@ -291,7 +291,4 @@ describe('WebdriverCSS captures desired parts of a website as screenshot with sp
         });
 
     });
-
-    after(afterHook);
-
 });
