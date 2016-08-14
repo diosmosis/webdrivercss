@@ -10,7 +10,7 @@ describe('WebdriverCSS compares images and exposes information about CSS regress
     };
 
     before(async function () {
-        WebdriverCSS.init(this.browser, { saveImages: true })
+        WebdriverCSS.init(this.browser)
 
         await this.browser
             .init()
