@@ -3,7 +3,7 @@ describe('WebdriverCSS should exclude parts of websites to ignore changing conte
     after(afterHook);
 
     before(async function () {
-        WebdriverCSS.init(this.browser, { saveImages: true })
+        WebdriverCSS.init(this.browser)
 
         await this.browser
             .init()

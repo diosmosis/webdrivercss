@@ -3,7 +3,7 @@ describe('WebdriverCSS should hide parts of websites to ignore changing content'
     after(afterHook);
 
     before(async function () {
-        WebdriverCSS.init(this.browser, { saveImages: true })
+        WebdriverCSS.init(this.browser)
 
         await this.browser
             .init()

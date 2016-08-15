@@ -3,7 +3,7 @@ describe('WebdriverCSS captures desired parts of a website as screenshot with sp
     after(afterHook);
 
     before(async function () {
-        WebdriverCSS.init(this.browser, { saveImages: true })
+        WebdriverCSS.init(this.browser)
 
         await this.browser
             .init()

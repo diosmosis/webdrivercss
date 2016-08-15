@@ -5,7 +5,7 @@ describe('WebdriverCSS captures shots with different screen widths', function() 
     var resultObject;
 
     before(async function() {
-        WebdriverCSS.init(this.browser, { saveImages: true })
+        WebdriverCSS.init(this.browser)
 
         resultObject = await this.browser
             .init()
