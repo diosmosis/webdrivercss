@@ -15,7 +15,6 @@
     "url": "git://github.com/webdriverio/webdrivercss.git"
   },
   "dependencies": {
-    "async": "^0.9.0",
     "deepmerge": "^0.2.7",
     "es6-promisify": "^4.1.0",
     "fs-extra": "^0.18.2",

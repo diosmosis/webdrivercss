@@ -1,4 +1,5 @@
 const exec = require('child-process-promise').exec;
+const promisify = require('es6-promisify')
 
 /**
  * require dependencies
@@ -8,7 +9,6 @@ global.WebdriverCSS = require('../index.js');
 global.fs = require('fs-extra');
 global.gm = require('gm');
 global.glob = require('glob');
-global.async  = require('async');
 global.should = require('chai').should();
 global.expect = require('chai').expect;
 global.capabilities = {logLevel: 'silent',desiredCapabilities:{browserName: 'phantomjs'}};
@@ -50,27 +50,20 @@ global.beforeHook = async function () {
     this.browser = WebdriverIO.remote(capabilities)
 };
 
-global.afterHook = function(done) {
+global.afterHook = async function() {
     var browser = this.browser;
+
+    const remove = promisify(fs.remove)
 
     /**
      * close browser and clean up created directories
      */
-    async.parallel([
-        function(done) {
-            browser.end()
-                .then(done.bind(null, null))
-                .catch(done);
-        },
-        function(done) { fs.remove(failedComparisonsRootDefault,done); },
-        function(done) { fs.remove(failedComparisonsRootCustom,done); },
-        function(done) {
-          exec('rm -r .tmp*').then(function (res) {
-            setImmediate(done);
-          }, function (err) {
-            setImmediate(done);
-          })
-        },
-    ], done);
-
+    await Promise.all([
+      browser.end(),
+      remove(failedComparisonsRootDefault),
+      remove(failedComparisonsRootCustom),
+      exec('rm -r .tmp*').catch(() => {
+        // ignore
+      }),
+    ])
 };
